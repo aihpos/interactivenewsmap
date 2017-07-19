@@ -1,6 +1,8 @@
-url <- https://www.elnuevodia.com/english/#
-  
-  webpage <- read_html(url)
+library(rvest) 
+
+url <- "https://www.elnuevodia.com/english/"
+
+webpage <- read_html(url)
 
 headline_data_html <- html_nodes(webpage, ".story-tease-title a , #Leaderboard iframe")
 
