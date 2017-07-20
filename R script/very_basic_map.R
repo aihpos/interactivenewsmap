@@ -14,3 +14,11 @@ m <- leaflet() %>%
   addTiles() %>% 
   addMarkers(data = data, lng = ~long, lat = ~lat, popup = "Whatever we want to popup")
 m
+
+
+#for pop up there are a few options you can set it equal to such as:
+
+popup = ~(x, y, sep " ")
+#x and y can be categories of the data scrip, a string of words, or a HTML code
+
+
