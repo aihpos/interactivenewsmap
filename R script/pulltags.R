@@ -21,17 +21,33 @@ doc
 
 doc <- fromJSON(content(doc, as = "text"))
 
+
+
 # want to pull one specific location from this list
 
 library(purrr)
 library(tidyr)
 
 doc2 <- doc
+doc2 <- as.data.frame(doc2)
+
+for (x in 1:nrow(doc2)){
+  if (is.null(doc2$response.entities.type[[x]])){
+    doc2$response.entities.type[[x]] <- c("none", "none")
+  }
+}
+
+doc2$response.entities.type <- map(doc2$response.entities.type, 1)
+
+
+
+
+
 
 # gets only place entities
-doc2$response$entities$type <- map(doc$response$entities$type, 1)
 
-locationtags <- keep(doc2, doc2$response$entities$type == "Place")
+
+locationtags <- keep(doc2, doc2$response.entities.type == "Place")
 
 
 locationtags <- dplyr::filter(doc2, response$entities$type == "Place")
