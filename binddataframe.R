@@ -5,6 +5,7 @@ a <- left_join(bigdfarticles2, latlongframe, by = location)
 a <- inner_join(latlongframe, bigdfarticles2, by = location)
 
 a <- bigdfarticles2 %>% left_join(latlongframe)
+View(a)
 
 server <- function(input, output, session){
   output$CountryMap <- renderLeaflet({
