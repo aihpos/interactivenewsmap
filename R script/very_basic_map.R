@@ -4,7 +4,7 @@ library(magrittr)
 
 m <- leaflet() %>% 
   addTiles() %>% 
-  addMarkers(data = latlongframe, lng = ~long, lat = ~lat, popup = ~(location))
+  addMarkers(data = a, lng = ~long, lat = ~lat, popup = ~(location))
 m
 
 
