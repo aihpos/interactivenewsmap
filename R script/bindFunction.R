@@ -23,6 +23,11 @@ newsSource <- combineNews("https://www.rt.com/news/", ".card__header_vertical_pa
 newsSource <- combineNews("http://www.iol.co.za/news/world", "h3 a", newsSource, "http://www.iol.co.za")
 newsSource <- combineNews("http://www.taipeitimes.com/News/world", "h2 a", newsSource, "www.taipeitimes.com/")
 newsSource <- combineNews("https://www.elnuevodia.com/english/", ".category-listing .story-tease-title a", newsSource, "https://www.elnuevodia.com")
+newsSource <- combineNews("http://www.chinadaily.com.cn/world/", ".tBox3 a , .tw3_01_t a , .tBox2 a", newsSource, "http://www.chinadaily.com.cn/world/")
+newsSource <- combineNews("http://www.taipeitimes.com/News/world", "h2 a", newsSource, "www.taipeitimes.com/")
+newsSource <- combineNews("http://www.iol.co.za/news/world", "h3 a", newsSource, "http://www.iol.co.za")
+
+
 
 
 
