@@ -62,6 +62,9 @@ get_locations <- function(text){
   
   places <- as.list(doc3$response.entities.entityId)
   
+  if (is_empty(places)){
+    places = "NONE"
+  }
   
   
   return(places)
