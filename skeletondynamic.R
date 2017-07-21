@@ -46,7 +46,7 @@ server <- function(input, output, session) {
     news <- input$source
     loc<- input$location
     a <- a %>%
-      filter(a$location %in% loc, a$source %in% news)
+      filter(location %in% input$location, source %in% input$source)
     
     leafletProxy("map") %>% clearMarkers %>%
       addCircleMarkers(
