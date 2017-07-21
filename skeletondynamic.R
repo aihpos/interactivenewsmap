@@ -37,7 +37,12 @@ server <- function(input, output, session) {
   
   output$map <- renderLeaflet({
     leaflet(a) %>% 
-      addTiles() 
+      addTiles() %>%
+      addCircleMarkers(
+        data = site, lng = ~long, lat = ~lat, popup = ~(articles.title),
+        color = ~factpal(location),
+        stroke = FALSE, fillOpacity = 0.5,
+        radius = runif(100, 4, 10)  )
   })
   
   observe({
