@@ -6,9 +6,10 @@ ui <- bootstrapPage(
   tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
   leafletOutput("map", width = "100%", height = "100%"),
   absolutePanel(top = 10, right = 10,
-                textInput("Landmark", label = h3("Text input"), value = "Enter text..."),
-                textInput("Location", label = h3("Text input"), value = "Enter text..."),
-                textInput("Source", label = h3("Text input"), value = "Enter text...")
+                textInput("locationtag", label = h3("Landmark"), value = "Enter text..."),
+                textInput("City", label = h3("City"), value = "Enter text..."),
+                textInput("Country", label = h3("Country"), value = "Enter text..."),
+                textInput("source", label = h3("Source"), value = "Enter text...")
   )
 )
 
@@ -16,20 +17,22 @@ server <- function(input, output, session) {
   
   # Reactive expression for the data subsetted to what the user selected
   filteredData <- reactive({
-    quakes[quakes$mag >= input$range[1] & quakes$mag <= input$range[2],]
+    a[a$location >= input$range[1] & a$source <= input$range[2],]
   })
-  
+  filteredData <- reactive({
+    a[a$source >= input$range[1] & a$source <= input$range[2],]
+  })
   # This reactive expression represents the palette function,
   # which changes as the user makes selections in UI.
   colorpal <- reactive({
-    colorNumeric(input$colors, quakes$mag)
+    colorFactorinput$colors, a$location)
   })
   
   output$map <- renderLeaflet({
     # Use leaflet() here, and only include aspects of the map that
     # won't need to change dynamically (at least, not unless the
     # entire map is being torn down and recreated).
-    leaflet(quakes) %>% addTiles() %>%
+    leaflet(a) %>% addTiles() %>%
       fitBounds(~min(long), ~min(lat), ~max(long), ~max(lat))
   })
   
@@ -41,25 +44,10 @@ server <- function(input, output, session) {
     pal <- colorpal()
     
     leafletProxy("map", data = filteredData()) %>%
-      clearShapes() %>%
-      addCircles(radius = ~10^mag/10, weight = 1, color = "#777777",
-                 fillColor = ~pal(mag), fillOpacity = 0.7, popup = ~paste(mag)
-      )
-  })
-  
-  # Use a separate observer to recreate the legend as needed.
-  observe({
-    proxy <- leafletProxy("map", data = quakes)
-    
-    # Remove any existing legend, and only if the legend is
-    # enabled, create a new one.
-    proxy %>% clearControls()
-    if (input$legend) {
-      pal <- colorpal()
-      proxy %>% addLegend(position = "bottomright",
-                          pal = pal, values = ~mag
-      )
-    }
+      clearShapes() #%>%
+      #addCircles(radius = ~10^nrow(location)/10, weight = 1, color = "#777777",
+                 #fillColor = ~pal(mag), fillOpacity = 0.7, popup = ~paste(mag)
+     #)
   })
 }
 
