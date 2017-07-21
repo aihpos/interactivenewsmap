@@ -2,7 +2,6 @@ get_locations <- function(text){
   
   # function to take string and pull location tags from it
   
-  apikey_textrazor <- "f9a1e365d6ed12cf4ac71a5c0c568c10fe10b581aa4ad2035c3f9602"
   
   text <- sprintf("text=%s", text)
   extractors <- "&extractors=entities"
@@ -31,6 +30,16 @@ get_locations <- function(text){
   
   places <- as.list(doc3$response.entities.entityId)
   
-  return(places)
+  unlist(places)
+  
+  places2 <- unlist(places)
+  places2 <- data.frame(locationtag = places2, stringsAsFactors = FALSE)
+  places2 <- places2[1,1]
+  
+  if (is.null(places2)){
+    places2 <- "NONE"
+  }
+  
+  return(places2)
   
 }
