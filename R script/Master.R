@@ -1,17 +1,45 @@
+#Necessary packages
+
+library(httr)
+library(jsonlite)
+library(lubridate)
+library(purrr)
+library(tidyr)
+library(dplyr)
+library(reshape2)
+library(rvest)
+library(stringr)
+
+# gather API keys
+apikey_google <- "AIzaSyCp7aDbT6-HsvliwprutvPGy2Gkmh9Z0W8"
+apikey_textrazor <- "0407e844333473eaf89156b68b244c7173bce93b1cea0fd39e90c900"
+apikey_news <- "233a215b20a141fcb3081beef8a9f10f"
+
+#Use newsapi to gather news sources 
+
 news.all <- GET("https://newsapi.org/v1/sources?category=general&language=en")
+
+#Convert the JSON file to a text file
 
 news1 <- fromJSON(content(news.all, as = "text"))
 
+#Convert the text file to a data frame
 news.all <- as.data.frame(news1)
+
+#Refine the data frame for only the sources and columns that we are interested in
 
 news <- select(news.all, sources.id, sources.name, sources.url) %>%
   filter(!sources.name %in% c("ABC News (AU)","Google News", "Newsweek","New York Magazine","Reddit /r/all","USA Today"))
 
+#This data frame is empty and is where all our articles headlines will be added (on a daily basis)
+
 bigdfarticles <- NULL
+
+#For loop that runs through our list of sources and grabs the headlines for each of them (daily?) and binds into the data frame
 
 for(x in 1:nrow(news)){
   news[x,1] -> news_id
-  newsurl = sprintf("https://newsapi.org/v1/articles?source=%s&apiKey=%s", news_id, apikey )
+  newsurl = sprintf("https://newsapi.org/v1/articles?source=%s&apiKey=%s", news_id, "233a215b20a141fcb3081beef8a9f10f" )
   articles_new <- GET(newsurl)
   articles1_new <- fromJSON(content(articles_new, as = "text")) 
   
@@ -24,18 +52,15 @@ for(x in 1:nrow(news)){
   bigdfarticles <- rbind(bigdfarticles, articles2_new)
 }
 
-news[x,1] -> news_id
-newsurl = sprintf("https://newsapi.org/v1/articles?source=%s&apiKey=%s", news_id, apikey )
-articles_new <- GET(newsurl)
-articles1_new <- fromJSON(content(articles_new, as = "text")) 
+# add location column to bigdfarticles
+bigdfarticles$locationtag <- "NONE"
 
-articles1_new <- as.data.frame(articles1_new)
-articles1_new$source <- as.character(articles1_new$source)
-articles1_new$articles.title <- as.character(articles1_new$articles.title)
-articles1_new$articles.url <- as.character(articles1_new$articles.url)
-
-articles2_new <- articles1_new %>% subset(select = c("source", "articles.title", "articles.url"))
-bigdfarticles <- rbind(bigdfarticles, articles2_new)
+for (x in 1:nrow(bigdfarticles)){
+  # for every article entry in bigdfarticles, run through textrazor API to pull first location
+  
+  bigdfarticles[x,4] <- get_locations(bigdfarticles[x,2])
+  
+}
 
 # bigdfarticles has the entire data frame of articles (size 167)
 # want to filter out the ones where locationtag == NONE
@@ -44,36 +69,44 @@ bigdfarticles2 <- filter(bigdfarticles, !(bigdfarticles$locationtag == "NONE"))
 # articles where locationtag == NONE are now filtered out
 # now have 2 if conditionals to make sure that the get_lat and get_long API request pull smoothly
 # (get rid of entries with more than 1 lat/long pair or no lat/long pair)
-
+View(bigdfarticles2)
 for (x in 1:nrow(bigdfarticles2)){
   # for every entry in the filtered article dataframe, go through and check:
   # if they return more than one result
   # OR if they return no result
   
   # variable to store the api request result
-  test_lat <- get_lat(bigdfarticles2[x,4])
+  test_long <- get_long(bigdfarticles2[x,4])
   
-  if (length(test_lat) > 1){
-    # there's more than one lat/long pair, get rid of the row
-    bigdfarticles2 <- bigdfarticles2[-x,]
-  }
+  print(bigdfarticles[x,4])
+  print(x)
+  print(test_long)
   
-  if (is.null(test_lat)){
-    # latitude API request returned null, get rid of the row
-    bigdfarticles2 <- bigdfarticles2[-x,]
+  if (length(test_long) > 1 || length(test_long) == 0){
+    # there's more than one lat/long pair, set to null
+    bigdfarticles2[x,4] <- "NONE"
   }
+  # if (is.null(test_long)){
+  #   # latitude API request returned null, get rid of the row
+  #   bigdfarticles2[x,4] <- "NONE"
+  #   print("is.null")
+  # }
 }
+
+bigdfarticles3 <- filter(bigdfarticles2, !(bigdfarticles2$locationtag == "NONE"))
 
 # bigdfarticles2 now stores filtered results that can be run through the API
 # (hopefully without any problems this time)
 
 # initialize data frame stored in the format:
 #     location  |   latitude    |   longitude
-latlongframe <- NULL
+latlongframe <- data.frame(location = "empty", lat = 0, long = 0, stringsAsFactors = FALSE)
 
-for (x in 1:nrow(bigdfarticles2)){
+for (x in 1:nrow(bigdfarticles3)){
   # goes through every article in the data frame to pull location data
-  locationname <- bigdfarticles2[x,4]
+  print(x)
+  print(bigdfarticles3[x,4])
+  locationname <- bigdfarticles3[x,4]
   latlongframe[x,1] <- locationname
   latlongframe[x,2] <- get_lat(locationname)
   latlongframe[x,3] <- get_long(locationname)

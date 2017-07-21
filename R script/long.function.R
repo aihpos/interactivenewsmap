@@ -1,4 +1,4 @@
-function(location, GAPI){
+get_long <- function(location){
   
   # utilizes google geocoding API
   # has a free daily limit usage of 2,500 requests
@@ -8,7 +8,7 @@ function(location, GAPI){
   
   # sends request to API
   google_url <- "https://maps.googleapis.com/maps/api/geocode/json?address="
-  req_url <- sprintf("%s%s&key=%s", google_url, location_nospace, GAPI)
+  req_url <- sprintf("%s%s&key=%s", google_url, location_nospace, apikey_google)
   
   latlong <- GET(req_url)
   latlong <- fromJSON(content(latlong, as = "text"))
@@ -20,3 +20,4 @@ function(location, GAPI){
   
   
 }
+
