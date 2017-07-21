@@ -1,4 +1,5 @@
 library(dplyr)
+library(shiny)
 library(leaflet)
 library(sp)
 library(magrittr)
@@ -23,9 +24,7 @@ ui <- bootstrapPage(
                                         "Hindustan times" = 7, "The Guardian" = 8, "Reuters" = 9,
                                         "Independent" = 10, "BBC News" = 11, "CNN" = 12, "Al-jazeera" = 13,
                                         "Associated-press" = 14, "Metro" = 15),
-                            selected = 1).
-                leafletOutput("map")
-                
+                            selected = 1)
   )
 )
 
@@ -45,10 +44,10 @@ server <- function(input, output, session) {
   observe({
     news <- input$source
     loc<- input$location
-    a <- a %>%
-      filter(location %in% input$location, source %in% input$source)
+    site <- a %>%
+      filter(location %in% loc, source %in% news)
     
-    leafletProxy("map") %>% clearMarkers %>%
+    leafletProxy("map") %>%
       addCircleMarkers(
         data = a, lng = ~long, lat = ~lat, popup = ~(articles.title),
         color = ~factpal(location),
